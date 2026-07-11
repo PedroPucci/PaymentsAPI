@@ -12,4 +12,9 @@
     <Folder Include="Repository\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PaymentsAPI.Application\PaymentsAPI.Application.csproj" />
+    <ProjectReference Include="..\PaymentsAPI.Domain\PaymentsAPI.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

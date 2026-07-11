@@ -16,4 +16,9 @@
     <Folder Include="Services\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PaymentsAPI.Domain\PaymentsAPI.Domain.csproj" />
+    <ProjectReference Include="..\PaymentsAPI.Shared\PaymentsAPI.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

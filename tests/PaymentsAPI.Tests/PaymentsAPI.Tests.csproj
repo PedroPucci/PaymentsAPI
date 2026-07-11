@@ -25,4 +25,9 @@
     <Folder Include="Services\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\PaymentsAPI.Application\PaymentsAPI.Application.csproj" />
+    <ProjectReference Include="..\..\src\PaymentsAPI.Infrastructure\PaymentsAPI.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

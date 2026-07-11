@@ -11,4 +11,8 @@
     <Folder Include="Logging\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PaymentsAPI.Domain\PaymentsAPI.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
