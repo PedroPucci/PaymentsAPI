@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="docs/TC NETT - Fase 2.pdf" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/PaymentsAPI.Application/PaymentsAPI.Application.csproj" />
+    <Project Path="src/PaymentsAPI.Domain/PaymentsAPI.Domain.csproj" />
+    <Project Path="src/PaymentsAPI.Infrastructure/PaymentsAPI.Infrastructure.csproj" />
+    <Project Path="src/PaymentsAPI.Shared/PaymentsAPI.Shared.csproj" />
+    <Project Path="src/PaymentsAPI/PaymentsAPI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PaymentsAPI.Tests/PaymentsAPI.Tests.csproj" />
+  </Folder>
+</Solution>
