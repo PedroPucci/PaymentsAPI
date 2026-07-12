@@ -1,71 +1,43 @@
 # FCG Payments API
 
-## Descrição do Projeto
+## Descrição
 
-O **FCG Payments API** é o microsserviço desenvolvido em **.NET 8** responsável pelo processamento (simulado) de pagamentos de compras de jogos da plataforma **FCG (FIAP Cloud Games)**.
+O **FCG Payments API** é o microsserviço responsável pelo processamento (simulado) dos pagamentos das compras de jogos da plataforma **FCG (FIAP Cloud Games)**.
 
-A aplicação segue os princípios de **Clean Architecture**, separação de responsabilidades e boas práticas de desenvolvimento backend.
+Desenvolvido em **.NET 8**, o projeto utiliza **Clean Architecture**, separação de responsabilidades e boas práticas de desenvolvimento backend.
 
-Este serviço é responsável por:
+Este microsserviço é responsável por:
 
-- Processar pagamentos de compras de jogos
-- Validar os dados do pagamento
-- Simular aprovação ou rejeição de pagamentos
-- Persistir transações no banco de dados
-- Gerar identificadores únicos de transações
-- Consumir eventos de compra
-- Publicar eventos de confirmação do pagamento
-- Registrar logs estruturados
+- Processar pagamentos;
+- Validar os dados da requisição;
+- Simular aprovação ou rejeição do pagamento;
+- Persistir as transações;
+- Publicar o resultado do processamento para os demais microsserviços.
 
 ---
 
-# Responsabilidades do Microsserviço
+# Responsabilidades
 
-## Processamento de Pagamentos
+O PaymentsAPI possui apenas uma responsabilidade:
 
-O PaymentsAPI recebe as informações necessárias para processar uma compra de jogo.
+## Processar pagamentos
 
-Cada pagamento possui:
+Recebe as informações da compra:
 
 - Usuário
 - Jogo
 - Valor
 - Método de pagamento
 
----
+Realiza o processamento do pagamento e registra a transação.
 
-## Simulação do Pagamento
-
-Como este projeto possui fins acadêmicos, o pagamento é simulado.
-
-Os possíveis status são:
+No fluxo completo da arquitetura orientada a eventos, este microsserviço consumirá o evento:
 
 ```text
-Pending
-Approved
-Rejected
-```
-
----
-
-## Fluxo de Eventos
-
-No fluxo completo da aplicação:
-
-```text
-CatalogAPI
-      │
-      ▼
 OrderPlacedEvent
-      │
-      ▼
-PaymentsAPI
-      │
-      ▼
-PaymentProcessedEvent
 ```
 
-O PaymentsAPI consome o evento **OrderPlacedEvent**, processa o pagamento e publica o evento:
+Após processar o pagamento, publicará:
 
 ```text
 PaymentProcessedEvent
@@ -75,16 +47,15 @@ PaymentProcessedEvent
 
 # Regras de Negócio
 
-### Pagamento
-
 - O usuário deve estar autenticado.
 - O GameId deve ser válido.
-- O valor deve ser maior que zero.
+- O valor do pagamento deve ser maior que zero.
 - O método de pagamento é obrigatório.
-- Cada pagamento gera uma TransactionId única.
-- O pagamento recebe um status.
+- Cada pagamento recebe um identificador único.
+- Cada pagamento possui um TransactionId.
+- O pagamento pode ser aprovado ou rejeitado.
 
-### Status possíveis
+Status possíveis:
 
 ```text
 Pending
@@ -94,7 +65,7 @@ Rejected
 
 ---
 
-# Recursos Utilizados
+# Tecnologias Utilizadas
 
 - .NET 8
 - Entity Framework Core
@@ -117,7 +88,7 @@ Rejected
 
 | Variável | Descrição |
 |----------|-----------|
-| ConnectionStrings__WebApiDatabase | String de conexão |
+| ConnectionStrings__WebApiDatabase | Banco SQL Server |
 | JwtSettings__SecretKey | Chave JWT |
 | JwtSettings__Issuer | Emissor do Token |
 | JwtSettings__Audience | Público do Token |
@@ -125,19 +96,15 @@ Rejected
 
 ---
 
-# Executando o Projeto
+# Executando
 
 ## Visual Studio
 
-1. Abra a solução.
-2. Defina **PaymentsAPI** como Startup Project.
-3. Execute a aplicação.
+Defina o projeto **PaymentsAPI** como Startup Project e execute.
 
 ---
 
 ## Docker
-
-Na raiz da solução execute:
 
 ```bash
 docker compose up --build
@@ -149,17 +116,11 @@ Swagger:
 http://localhost:8082/swagger
 ```
 
-Parar containers:
-
-```bash
-docker compose down
-```
-
 ---
 
-# Endpoints
+# Endpoint
 
-## Processamento de Pagamento
+## Processar Pagamento
 
 ```http
 POST /api/payments
@@ -169,9 +130,9 @@ Exemplo:
 
 ```json
 {
-  "gameId": 1,
-  "amount": 149.90,
-  "paymentMethod": "CreditCard"
+    "gameId": 1,
+    "amount": 149.90,
+    "paymentMethod": "CreditCard"
 }
 ```
 
@@ -179,22 +140,41 @@ Resposta:
 
 ```json
 {
-  "success": true,
-  "data": {
-    "id": "GUID",
-    "userId": "USER_ID",
-    "gameId": 1,
-    "amount": 149.90,
-    "paymentMethod": "CreditCard",
-    "transactionId": "PAY-XXXXXXXX",
-    "status": "Approved"
-  }
+    "success": true,
+    "data": {
+        "id": "GUID",
+        "userId": "USER_ID",
+        "gameId": 1,
+        "amount": 149.90,
+        "paymentMethod": "CreditCard",
+        "transactionId": "PAY-XXXXXXXX",
+        "status": "Approved"
+    }
 }
 ```
 
 ---
 
-# Estrutura da Solução
+# Fluxo da Arquitetura
+
+```text
+CatalogAPI
+      │
+      ▼
+OrderPlacedEvent
+      │
+      ▼
+PaymentsAPI
+      │
+Processa pagamento
+      │
+      ▼
+PaymentProcessedEvent
+```
+
+---
+
+# Estrutura
 
 ```text
 PaymentsAPI
@@ -211,19 +191,3 @@ PaymentsAPI
 ├── docker-compose
 └── README.md
 ```
-
----
-
-# Tecnologias
-
-- .NET 8
-- SQL Server
-- Entity Framework Core
-- Serilog
-- FluentValidation
-- Docker
-- Swagger
-- JWT
-- Clean Architecture
-- Repository Pattern
-- Unit of Work
