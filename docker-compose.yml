@@ -24,12 +24,14 @@ services:
 
       JwtSettings__Issuer: "PedroIghor"
       JwtSettings__Audience: "https://localhost:5001"
-      JwtSettings__SecretKey: "SUA_CHAVE_SECRETA"
+      JwtSettings__SecretKey: "EAA4Cf4JnqYwBP9MSZC8cHvMSvmShHZBU27qQxZBS3ORNSoIdEz3me0QHZABLNBiEWtDmVLZBVeMF8QZCd"
       JwtSettings__ExpirationInMinutes: "60"
 
     depends_on:
       payments-sqlserver:
         condition: service_healthy
+
+    restart: unless-stopped
 
   payments-sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -41,7 +43,7 @@ services:
       MSSQL_SA_PASSWORD: "SuaSenhaForte@123"
 
     ports:
-      - "1434:1433"
+      - "1435:1433"
 
     volumes:
       - payments-sqlserver-data:/var/opt/mssql
@@ -56,6 +58,8 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+
+    restart: unless-stopped
 
 volumes:
   payments-sqlserver-data:
