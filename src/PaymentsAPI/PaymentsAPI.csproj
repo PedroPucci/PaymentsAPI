@@ -23,11 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Extensions\ExtensionLog\" />
-    <Folder Include="Extensions\SwaggerDocumentation\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\PaymentsAPI.Application\PaymentsAPI.Application.csproj" />
     <ProjectReference Include="..\PaymentsAPI.Infrastructure\PaymentsAPI.Infrastructure.csproj" />
   </ItemGroup>
