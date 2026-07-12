@@ -1,4 +1,6 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using PaymentsAPI.Consumers;
 using PaymentsAPI.Extensions;
 using PaymentsAPI.Extensions.ExtensionLog;
 using PaymentsAPI.Infrastructure.Connections;
@@ -11,6 +13,40 @@ builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddScoped<PaymentProcessedEventPublisher>();
+
+var rabbitMqHost =
+    builder.Configuration["RabbitMq:Host"]
+    ?? "localhost";
+
+var rabbitMqUsername =
+    builder.Configuration["RabbitMq:Username"]
+    ?? "guest";
+
+var rabbitMqPassword =
+    builder.Configuration["RabbitMq:Password"]
+    ?? "guest";
+
+builder.Services.AddMassTransit(configuration =>
+{
+    configuration.AddConsumer<OrderPlacedEventConsumer>();
+
+    configuration.UsingRabbitMq((context, rabbitMq) =>
+    {
+        rabbitMq.Host(rabbitMqHost, "/", host =>
+        {
+            host.Username(rabbitMqUsername);
+            host.Password(rabbitMqPassword);
+        });
+
+        rabbitMq.ReceiveEndpoint(
+            "payments-order-placed",
+            endpoint =>
+            {
+                endpoint.ConfigureConsumer<OrderPlacedEventConsumer>(
+                    context);
+            });
+    });
+});
 
 LogExtension.InitializeLogger();
 var loggerSerialLog = LogExtension.GetLogger();
