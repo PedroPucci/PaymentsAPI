@@ -1,7 +1,8 @@
-using PaymentsAPI.Infrastructure.Connections;
 using Microsoft.EntityFrameworkCore;
 using PaymentsAPI.Extensions;
 using PaymentsAPI.Extensions.ExtensionLog;
+using PaymentsAPI.Infrastructure.Connections;
+using PaymentsAPI.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddScoped<PaymentProcessedEventPublisher>();
 
 LogExtension.InitializeLogger();
 var loggerSerialLog = LogExtension.GetLogger();
