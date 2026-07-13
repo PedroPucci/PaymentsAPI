@@ -81,14 +81,28 @@ namespace PaymentsAPI.Application.Services
 
                 return Result<PaymentResponseDto>.Ok(response);
             }
+            //catch (Exception ex)
+            //{
+            //    await transaction.RollbackAsync();
+
+            //    Log.Error(LogMessages.AddingPaymentError(ex));
+
+            //    return Result<PaymentResponseDto>.Error(
+            //        $"Error processing payment: {ex.Message}");
+            //}
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
 
-                Log.Error(LogMessages.AddingPaymentError(ex));
+                var errorMessage =
+                    ex.InnerException?.InnerException?.Message
+                    ?? ex.InnerException?.Message
+                    ?? ex.Message;
+
+                Log.Error(ex, "Erro ao processar pagamento");
 
                 return Result<PaymentResponseDto>.Error(
-                    $"Error processing payment: {ex.Message}");
+                    $"Error processing payment: {errorMessage}");
             }
         }
 
