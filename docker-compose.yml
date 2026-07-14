@@ -15,8 +15,8 @@ services:
       ASPNETCORE_URLS: "http://+:8080"
 
       RabbitMq__Host: "host.docker.internal"
-      RabbitMq__Username: "guest"
-      RabbitMq__Password: "guest"
+      RabbitMq__Username: "fcguser"
+      RabbitMq__Password: "FcgRabbit@2026"
 
       ConnectionStrings__WebApiDatabase: "Server=payments-sqlserver,1433;Database=FCGPayments;User Id=sa;Password=SuaSenhaForte@123;TrustServerCertificate=True;Encrypt=False;"
 
