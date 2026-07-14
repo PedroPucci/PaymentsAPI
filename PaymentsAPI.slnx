@@ -2,6 +2,7 @@
   <Folder Name="/docs/">
     <File Path="docs/TC NETT - Fase 2.pdf" />
   </Folder>
+  <Folder Name="/k8s/" />
   <Folder Name="/src/">
     <Project Path="src/PaymentsAPI.Application/PaymentsAPI.Application.csproj" />
     <Project Path="src/PaymentsAPI.Domain/PaymentsAPI.Domain.csproj" />

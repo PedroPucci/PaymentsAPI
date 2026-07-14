@@ -1,4 +1,3 @@
-# Imagem usada para executar a API
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 
 USER app
@@ -6,16 +5,17 @@ WORKDIR /app
 
 EXPOSE 8080
 
-ENV ASPNETCORE_URLS=http://+:8080
-ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_HTTP_PORTS=8080
 
 
-# Imagem usada para restaurar e compilar o projeto
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 ARG BUILD_CONFIGURATION=Release
 
 WORKDIR /src
+
+COPY ["nuget.config", "/src/nuget.config"]
+COPY ["nuget-packages/", "/src/nuget-packages/"]
 
 COPY ["src/PaymentsAPI/PaymentsAPI.csproj", "src/PaymentsAPI/"]
 COPY ["src/PaymentsAPI.Application/PaymentsAPI.Application.csproj", "src/PaymentsAPI.Application/"]
@@ -23,35 +23,22 @@ COPY ["src/PaymentsAPI.Domain/PaymentsAPI.Domain.csproj", "src/PaymentsAPI.Domai
 COPY ["src/PaymentsAPI.Infrastructure/PaymentsAPI.Infrastructure.csproj", "src/PaymentsAPI.Infrastructure/"]
 COPY ["src/PaymentsAPI.Shared/PaymentsAPI.Shared.csproj", "src/PaymentsAPI.Shared/"]
 
-RUN dotnet restore "src/PaymentsAPI/PaymentsAPI.csproj"
+RUN dotnet restore "src/PaymentsAPI/PaymentsAPI.csproj" \
+    --configfile "/src/nuget.config"
 
 COPY . .
 
-WORKDIR "/src/src/PaymentsAPI"
-
-RUN dotnet build "PaymentsAPI.csproj" \
-    -c $BUILD_CONFIGURATION \
-    -o /app/build \
-    --no-restore
-
-
-# Publicação da aplicação
-FROM build AS publish
-
-ARG BUILD_CONFIGURATION=Release
-
-RUN dotnet publish "PaymentsAPI.csproj" \
+RUN dotnet publish "src/PaymentsAPI/PaymentsAPI.csproj" \
     -c $BUILD_CONFIGURATION \
     -o /app/publish \
-    /p:UseAppHost=false \
-    --no-restore
+    --no-restore \
+    /p:UseAppHost=false
 
 
-# Imagem final
 FROM base AS final
 
 WORKDIR /app
 
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 
 ENTRYPOINT ["dotnet", "PaymentsAPI.dll"]
