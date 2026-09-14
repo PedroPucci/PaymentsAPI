@@ -1,3 +1,5 @@
+using Amazon;
+using Amazon.SQS;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using PaymentsAPI.Consumers;
@@ -11,7 +13,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddApplicationServices(builder.Configuration);
+
+// AWS SQS
+builder.Services.AddSingleton<IAmazonSQS>(_ =>
+{
+    var region =
+        builder.Configuration["AWS:Region"]
+        ?? "us-east-1";
+
+    return new AmazonSQSClient(
+        RegionEndpoint.GetBySystemName(region));
+});
+
+// Publicador do evento de pagamento processado
 builder.Services.AddScoped<PaymentProcessedEventPublisher>();
 
 var rabbitMqHost =
@@ -49,8 +65,11 @@ builder.Services.AddMassTransit(configuration =>
 });
 
 LogExtension.InitializeLogger();
+
 var loggerSerialLog = LogExtension.GetLogger();
-loggerSerialLog.Information("Logging initialized.");
+
+loggerSerialLog.Information(
+    "Logging initialized.");
 
 var app = builder.Build();
 
@@ -59,9 +78,12 @@ app.UseMiddleware<ExceptionMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
+
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "FCG Catalog API v1");
+        c.SwaggerEndpoint(
+            "/swagger/v1/swagger.json",
+            "FCG Payments API v1");
     });
 }
 
@@ -81,22 +103,30 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-var runMigrations = builder.Configuration.GetValue<bool>("RunMigrations");
+var runMigrations =
+    builder.Configuration.GetValue<bool>("RunMigrations");
 
 if (runMigrations)
 {
     using var scope = app.Services.CreateScope();
+
     var services = scope.ServiceProvider;
 
     try
     {
-        var context = services.GetRequiredService<DataContext>();
+        var context =
+            services.GetRequiredService<DataContext>();
+
         context.Database.Migrate();
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred during migration!");
+        var logger =
+            services.GetRequiredService<ILogger<Program>>();
+
+        logger.LogError(
+            ex,
+            "An error occurred during migration!");
     }
 }
 

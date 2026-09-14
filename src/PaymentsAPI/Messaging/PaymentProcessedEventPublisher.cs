@@ -1,17 +1,23 @@
-﻿using FCG.Contracts.Events;
-using MassTransit;
+﻿using System.Text.Json;
+using Amazon.SQS;
+using Amazon.SQS.Model;
+using FCG.Contracts.Events;
+using Microsoft.Extensions.Configuration;
 using PaymentsAPI.Application.Contracts.Dto;
 
 namespace PaymentsAPI.Messaging
 {
     public class PaymentProcessedEventPublisher
     {
-        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IAmazonSQS _sqs;
+        private readonly IConfiguration _configuration;
 
         public PaymentProcessedEventPublisher(
-            IPublishEndpoint publishEndpoint)
+            IAmazonSQS sqs,
+            IConfiguration configuration)
         {
-            _publishEndpoint = publishEndpoint;
+            _sqs = sqs;
+            _configuration = configuration;
         }
 
         public async Task Publish(
@@ -28,7 +34,27 @@ namespace PaymentsAPI.Messaging
                 payment.TransactionId,
                 payment.ProcessedAt ?? DateTime.UtcNow);
 
-            await _publishEndpoint.Publish(paymentProcessedEvent);
+            var message = new
+            {
+                eventType = "PaymentProcessed",
+                data = paymentProcessedEvent
+            };
+
+            var queueUrl =
+                _configuration["AWS:SQS:NotificationsQueueUrl"];
+
+            if (string.IsNullOrWhiteSpace(queueUrl))
+            {
+                throw new InvalidOperationException(
+                    "AWS:SQS:NotificationsQueueUrl não configurada.");
+            }
+
+            await _sqs.SendMessageAsync(
+                new SendMessageRequest
+                {
+                    QueueUrl = queueUrl,
+                    MessageBody = JsonSerializer.Serialize(message)
+                });
         }
     }
 }
