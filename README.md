@@ -191,3 +191,16 @@ PaymentsAPI
 ├── docker-compose
 └── README.md
 ```
+
+---
+
+# Fase 3 — Integração com AWS SQS
+
+Na Fase 3, o PaymentsAPI foi preparado para publicar eventos de pagamento processado em uma fila AWS SQS.
+
+## AWS SQS
+
+Foi adicionada a dependência:
+
+```text
+AWSSDK.SQS
